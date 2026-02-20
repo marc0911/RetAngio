@@ -1,0 +1,72 @@
+seed: 12345
+
+paths:
+  input_seurat_rds: "data/input_seurat.rds"
+  zarkada_excel: "data/zarkada_markers.xlsx"
+  raw_matrix_dirs: {} # optional named mapping: sample_id: /path/to/cellranger_outs
+
+output:
+  root: "outputs"
+  snapshots_dir: "snapshots"
+  reports_dir: "reports"
+  plots_dir: "plots"
+  tables_dir: "tables"
+  logs_dir: "logs"
+
+input_assays:
+  required: ["RNA", "SCT"]
+  default_assay: "SCT"
+
+contaminant_filter:
+  cluster_column: "SCT_snn_res.0.4"
+  clusters_to_remove: ["5", "7", "11", "13"]
+
+recluster:
+  npcs: 50
+  dims_grid: [10, 15, 20, 30]
+  resolution_grid: [0.2, 0.4, 0.6, 0.8]
+  k_param: 20
+  final_dims: 20
+  final_resolution: 0.4
+  final_cluster_column: "SCT_snn_res.0.4"
+
+base_object:
+  assays_to_keep: ["RNA", "SCT"]
+  keep_meta_columns:
+    - "orig.ident"
+    - "nCount_RNA"
+    - "nFeature_RNA"
+    - "percent.mt"
+    - "percent.ribo"
+    - "doublettype"
+    - "doubletscore"
+  drop_scale_data: true
+
+qc:
+  hb_genes: ["Hba-a1", "Hba-a2", "Hbb-bs", "Hbb-bt"]
+  photoreceptor_markers: ["Rho", "Pde6a", "Pde6b", "Gnat1", "Gnat2", "Opn1sw", "Opn1mw"]
+  rpe_markers: ["Rpe65", "Best1", "Krt18", "Mertk"]
+
+annotation:
+  method: "AddModuleScore"
+  species: "mouse"
+  min_geneset_size: 3
+  extra_reference_sets_csv: null
+
+dge:
+  cluster_markers:
+    test_use: "wilcox"
+    min_pct: 0.1
+    logfc_threshold: 0.25
+    max_cells_per_ident: 2000
+  pseudobulk:
+    design_factors: ["condition", "timepoint"]
+    sample_column: "orig.ident"
+    condition_column: "condition"
+    timepoint_column: "timepoint"
+    min_cells_per_sample_cluster: 20
+
+plots:
+  width: 10
+  height: 8
+  dpi: 300
