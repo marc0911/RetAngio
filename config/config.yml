@@ -1,0 +1,64 @@
+project:
+  name: RetAngio
+  seed: 1729
+  output_dir: outputs
+
+io:
+  # Serialization backend for pipeline object snapshots.
+  # rds (default): base R saveRDS/readRDS, highest portability, no extra system deps.
+  # qs2: optional faster backend if CRAN package qs2 is installed.
+  # fst_df: optional, only for data.frame serialization; non-data.frame objects fall back to RDS.
+  backend: rds
+  # saveRDS compression parameter (base R docs: ?saveRDS): TRUE/FALSE or gzip/bzip2/xz.
+  rds_compress: gzip
+  # fst compression level (0-100), used only when backend=fst_df.
+  fst_compress: 50
+
+input:
+  seurat_rds: data/input/retangio_integrated_qc.rds
+  sample_column: orig.ident
+  condition_column: condition
+  baseline_condition: CTRL
+  timepoint_column: timepoint
+  zarkada_excel: data/reference/Zarkada_signatures.xlsx
+  zarkada_sheet: signatures
+
+integration:
+  assay: SCT
+  nfeatures: 3000
+  dims: 1:30
+  clustering_resolution: 0.4
+  final_cluster_column: final_cluster
+  contaminant_cluster_column: SCT_snn_res.0.4
+  contaminants:
+    - "5"
+    - "7"
+    - "11"
+    - "13"
+
+markers:
+  assay: RNA
+  test_use: wilcox
+  logfc_threshold: 0.25
+  min_pct: 0.1
+  max_cells_per_ident: 2000
+
+pseudobulk:
+  min_replicates_per_condition: 2
+  top_n: 50
+  fdr_threshold: 0.05
+  lfc_threshold: 0.25
+
+qc:
+  hemoglobin_genes: [Hba-a1, Hba-a2, Hbb-bs, Hbb-bt]
+  photoreceptor_markers: [Rho, Pde6b, Gnat1, Prph2]
+  rpe_markers: [Rpe65, Best1, Mertk, Rlbp1]
+
+annotation:
+  score_method: ucell
+  merge_sets:
+    endothelial_core: [tip, stalk, venous]
+
+soupx:
+  enabled: false
+  raw_mtx_dir: null
