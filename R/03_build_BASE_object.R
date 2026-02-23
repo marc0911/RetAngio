@@ -25,6 +25,12 @@ main <- function() {
   }
   check_required_layers(seu, "RNA")
 
+  original_cluster_col <- cfg$integration$contaminant_cluster_column
+  if (!original_cluster_col %in% colnames(seu@meta.data)) {
+    fail_fast("Original contaminant cluster column missing: {original_cluster_col}")
+  }
+  check_contaminants_removed(seu, original_cluster_col, cfg$integration$contaminants)
+
   # Keep counts only in SCT for memory-safe BASE snapshot.
   sct_counts <- get_layer_data(seu, assay = "SCT", layer = "counts", fallback_slot = "counts")
   seu[["SCT"]] <- CreateAssayObject(counts = sct_counts)
@@ -40,7 +46,6 @@ main <- function() {
 
   assert_ident_matches(seu, "final_cluster")
   assert_reductions_present(seu)
-  check_contaminants_removed(seu, "final_cluster", cfg$integration$contaminants)
 
   out_rds <- file.path(outdir, "03_BASE_object.rds")
   saveRDS(seu, out_rds, compress = "xz")

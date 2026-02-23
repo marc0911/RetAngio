@@ -22,7 +22,26 @@ read_config <- function(path = "config/config.yml") {
   if (!file.exists(path)) {
     fail_fast("Missing config file: {path}")
   }
-  yaml::read_yaml(path)
+  cfg <- yaml::read_yaml(path)
+  cfg$integration$dims <- parse_integer_sequence(cfg$integration$dims, "integration.dims")
+  cfg
+}
+
+parse_integer_sequence <- function(x, field_name = "value") {
+  if (is.numeric(x)) {
+    vals <- as.integer(x)
+  } else if (is.character(x) && length(x) == 1 && grepl("^\\s*\\d+\\s*:\\s*\\d+\\s*$", x)) {
+    bounds <- as.integer(trimws(strsplit(x, ":", fixed = TRUE)[[1]]))
+    vals <- seq.int(bounds[1], bounds[2])
+  } else {
+    fail_fast("config {field_name} must be a numeric vector or range string like 1:30")
+  }
+
+  if (length(vals) == 0 || any(is.na(vals)) || any(vals < 1)) {
+    fail_fast("config {field_name} must contain positive integers")
+  }
+
+  vals
 }
 
 ensure_dir <- function(path) {

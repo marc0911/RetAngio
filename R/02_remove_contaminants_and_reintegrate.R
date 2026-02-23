@@ -15,6 +15,7 @@ main <- function() {
   cluster_col <- cfg$integration$contaminant_cluster_column
   contaminants <- as.character(cfg$integration$contaminants)
   sample_col <- cfg$input$sample_column
+  dims <- parse_integer_sequence(cfg$integration$dims, "integration.dims")
 
   if (!cluster_col %in% colnames(seu@meta.data)) {
     fail_fast("Cluster column missing: {cluster_col}")
@@ -34,7 +35,7 @@ main <- function() {
   seu <- merge(obj_list[[1]], y = obj_list[-1])
   VariableFeatures(seu) <- features
 
-  seu <- RunPCA(seu, assay = cfg$integration$assay, features = features, npcs = max(cfg$integration$dims), verbose = FALSE)
+  seu <- RunPCA(seu, assay = cfg$integration$assay, features = features, npcs = max(dims), verbose = FALSE)
 
   seu[[cfg$integration$assay]] <- split(seu[[cfg$integration$assay]], f = seu[[sample_col]][, 1])
   seu <- IntegrateLayers(
@@ -43,13 +44,13 @@ main <- function() {
     orig.reduction = "pca",
     new.reduction = "integrated.rpca",
     assay = cfg$integration$assay,
-    dims = cfg$integration$dims,
+    dims = dims,
     verbose = FALSE
   )
 
-  seu <- FindNeighbors(seu, reduction = "integrated.rpca", dims = cfg$integration$dims)
+  seu <- FindNeighbors(seu, reduction = "integrated.rpca", dims = dims)
   seu <- FindClusters(seu, resolution = cfg$integration$clustering_resolution)
-  seu <- RunUMAP(seu, reduction = "integrated.rpca", dims = cfg$integration$dims)
+  seu <- RunUMAP(seu, reduction = "integrated.rpca", dims = dims)
 
   # enforce final cluster column and Idents alignment
   new_cluster_col <- paste0("integrated_snn_res.", cfg$integration$clustering_resolution)
