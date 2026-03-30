@@ -8,8 +8,8 @@
 
 set -euo pipefail
 
-# Conservative defaults above are usually safe for stage 0,
-# but you may need to adjust CPU/memory/time for your cluster and dataset size.
+# Conservative defaults for stage 0.
+# Adjust CPU, memory, and walltime based on dataset size and cluster policy.
 
 mkdir -p logs
 

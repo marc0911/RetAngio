@@ -1,6 +1,7 @@
 # RetAngio v4 configuration
-# This file defines pipeline defaults and relative paths.
-# Update values as needed for your environment.
+#
+# This configuration is intentionally explicit and conservative.
+# Update paths and parameters to match your environment before running.
 
 project:
   name: "RetAngio"
@@ -8,6 +9,7 @@ project:
   output_dir: "results"
 
 input:
+  # Sample manifest is the source of truth for stage 0 inputs.
   samples_csv: "config/samples.csv"
   raw_archives_dir: "data/raw_archives"
   extracted_dir: "data/extracted"
@@ -19,6 +21,7 @@ analysis:
   baseline_condition: "CTRL"
 
 preprocessing:
+  # Applied in Seurat::CreateSeuratObject during stage 0 object construction.
   min_cells_per_gene: 3
   min_features_create_object: 200
 
@@ -30,10 +33,18 @@ ambient_rna:
 
 unintegrated:
   npcs: 30
-  resolution_grid: [0.2, 0.4, 0.6, 0.8, 1.0]
+  resolution_grid:
+    - 0.2
+    - 0.4
+    - 0.6
+    - 0.8
+    - 1.0
 
 integration:
-  methods: ["none", "rpca", "harmony"]
+  methods:
+    - "none"
+    - "rpca"
+    - "harmony"
   nfeatures: 3000
   npcs: 30
 

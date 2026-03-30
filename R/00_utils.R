@@ -37,14 +37,13 @@ read_config <- function(config_path) {
   assert_file_exists(config_path, label = "config")
   cfg <- yaml::read_yaml(config_path)
   if (!is.list(cfg)) {
-    stop(sprintf("Config file '%s' did not parse as a YAML list.", config_path), call. = FALSE)
+    stop(sprintf("Config file '%s' did not parse as a YAML mapping/list.", config_path), call. = FALSE)
   }
   cfg
 }
 
 save_rds_with_log <- function(object, path) {
-  parent <- dirname(path)
-  ensure_dir(parent)
+  ensure_dir(dirname(path))
   saveRDS(object, path)
   log_message("Saved RDS: ", path)
 }
@@ -58,7 +57,11 @@ load_rds_with_log <- function(path) {
 read_samples_csv <- function(samples_csv) {
   assert_file_exists(samples_csv, label = "samples CSV")
 
-  samples <- utils::read.csv(samples_csv, stringsAsFactors = FALSE, check.names = FALSE)
+  samples <- utils::read.csv(
+    file = samples_csv,
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
 
   required_cols <- c(
     "sample_id", "condition", "timepoint",
@@ -83,14 +86,14 @@ read_samples_csv <- function(samples_csv) {
     )
   }
 
-  required_nonempty <- required_cols
-  for (col in required_nonempty) {
+  required_nonempty_stage0 <- c("sample_id", "condition", "timepoint", "filtered_h5")
+  for (col in required_nonempty_stage0) {
     is_missing <- is.na(samples[[col]]) | trimws(samples[[col]]) == ""
     if (any(is_missing)) {
       bad_rows <- which(is_missing)
       stop(
         sprintf(
-          "Missing value(s) in column '%s' for row index/indices: %s",
+          "Stage-0 required column '%s' has missing value(s) at row(s): %s",
           col,
           paste(bad_rows, collapse = ", ")
         ),
@@ -99,11 +102,19 @@ read_samples_csv <- function(samples_csv) {
     }
   }
 
+  # raw_h5 and molecule_info_h5 are optional for stage 0.
+  # Keep as character, normalize blanks to NA for cleaner downstream handling.
+  optional_cols <- c("raw_h5", "molecule_info_h5")
+  for (col in optional_cols) {
+    vals <- trimws(samples[[col]])
+    vals[is.na(vals) | vals == ""] <- NA_character_
+    samples[[col]] <- vals
+  }
+
   samples
 }
 
 create_stage_dirs <- function(cfg) {
-  # Uses explicit repository paths so stage scripts are robust from repo root.
   dirs <- c(
     cfg$project$output_dir,
     "results/objects",
@@ -157,7 +168,6 @@ stop_for_missing_decision <- function(path, message = NULL) {
 
 guess_sample_paths <- function(sample_id, extracted_dir = "data/extracted") {
   # Convenience helper only. The manifest remains source of truth.
-  # This function can help users construct config/samples.csv.
   sample_dir <- file.path(extracted_dir, sample_id)
   if (!dir.exists(sample_dir)) {
     return(list(filtered = NA_character_, raw = NA_character_, molecule = NA_character_))
@@ -193,8 +203,7 @@ guess_sample_paths <- function(sample_id, extracted_dir = "data/extracted") {
 }
 
 resolve_filtered_input_path <- function(filtered_path) {
-  # Primary expectation is an H5 path from the manifest.
-  # Fallback: if a matrix directory path is provided, allow that.
+  # Primary expectation: filtered matrix path from manifest.
   if (file.exists(filtered_path)) {
     return(list(path = filtered_path, type = "h5_or_file"))
   }
@@ -203,7 +212,7 @@ resolve_filtered_input_path <- function(filtered_path) {
     return(list(path = filtered_path, type = "matrix_dir"))
   }
 
-  # Additional conservative fallback for users who list parent sample directories.
+  # Conservative fallback if a sample directory was supplied instead of matrix path.
   dir_candidate <- file.path(filtered_path, "sample_filtered_feature_bc_matrix")
   if (dir.exists(dir_candidate)) {
     return(list(path = dir_candidate, type = "matrix_dir"))
@@ -214,6 +223,7 @@ resolve_filtered_input_path <- function(filtered_path) {
     file.path(filtered_path, "sample_filtered_feature_bc_matrix.h5"),
     file.path(filtered_path, "filtered_feature_bc_matrix.h5")
   )
+
   for (candidate in h5_candidates) {
     if (file.exists(candidate)) {
       return(list(path = candidate, type = "h5_or_file"))
@@ -224,7 +234,7 @@ resolve_filtered_input_path <- function(filtered_path) {
     sprintf(
       paste(
         "Unable to resolve filtered matrix input from manifest value '%s'.",
-        "Provide either a valid filtered H5 path or a valid filtered matrix directory."
+        "Provide a valid filtered H5 path or filtered matrix directory."
       ),
       filtered_path
     ),
