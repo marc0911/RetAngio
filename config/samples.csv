@@ -1,6 +1,6 @@
 sample_id,condition,timepoint,filtered_h5,raw_h5,molecule_info_h5
-P7,CTRL,P7,data/extracted/P7/sample_filtered_feature_bc_matrix.h5,data/extracted/P7/raw_feature_bc_matrix.h5,data/extracted/P7/raw_molecule_info.h5
-P12_CTRL,CTRL,P12,data/extracted/P12_CTRL/sample_filtered_feature_bc_matrix.h5,data/extracted/P12_CTRL/raw_feature_bc_matrix.h5,data/extracted/P12_CTRL/raw_molecule_info.h5
-P12_OIR,OIR,P12,data/extracted/P12_OIR/sample_filtered_feature_bc_matrix.h5,data/extracted/P12_OIR/raw_feature_bc_matrix.h5,data/extracted/P12_OIR/raw_molecule_info.h5
-P17_CTRL,CTRL,P17,data/extracted/P17_CTRL/sample_filtered_feature_bc_matrix.h5,data/extracted/P17_CTRL/raw_feature_bc_matrix.h5,data/extracted/P17_CTRL/raw_molecule_info.h5
-P17_OIR,OIR,P17,data/extracted/P17_OIR/sample_filtered_feature_bc_matrix.h5,data/extracted/P17_OIR/raw_feature_bc_matrix.h5,data/extracted/P17_OIR/raw_molecule_info.h5
+P7,CTRL,P7,data/extracted/P7/P7/outs/per_sample_outs/P7/count/sample_filtered_feature_bc_matrix.h5,data/extracted/P7/P7/outs/multi/count/raw_feature_bc_matrix.h5,data/extracted/P7/P7/outs/multi/count/raw_molecule_info.h5
+P12_CTRL,CTRL,P12,data/extracted/P12_CTRL/P12_CTRL/outs/per_sample_outs/P12_CTRL/count/sample_filtered_feature_bc_matrix.h5,data/extracted/P12_CTRL/P12_CTRL/outs/multi/count/raw_feature_bc_matrix.h5,data/extracted/P12_CTRL/P12_CTRL/outs/multi/count/raw_molecule_info.h5
+P12_OIR,OIR,P12,data/extracted/P12_OIR/P12_OIR/outs/per_sample_outs/P12_OIR/count/sample_filtered_feature_bc_matrix.h5,data/extracted/P12_OIR/P12_OIR/outs/multi/count/raw_feature_bc_matrix.h5,data/extracted/P12_OIR/P12_OIR/outs/multi/count/raw_molecule_info.h5
+P17_CTRL,CTRL,P17,data/extracted/P17_CTRL/P17_CTRL/outs/per_sample_outs/P17_CTRL/count/sample_filtered_feature_bc_matrix.h5,data/extracted/P17_CTRL/P17_CTRL/outs/multi/count/raw_feature_bc_matrix.h5,data/extracted/P17_CTRL/P17_CTRL/outs/multi/count/raw_molecule_info.h5
+P17_OIR,OIR,P17,data/extracted/P17_OIR/P17_OIR/outs/per_sample_outs/P17_OIR/count/sample_filtered_feature_bc_matrix.h5,data/extracted/P17_OIR/P17_OIR/outs/multi/count/raw_feature_bc_matrix.h5,data/extracted/P17_OIR/P17_OIR/outs/multi/count/raw_molecule_info.h5
