@@ -1,0 +1,46 @@
+# RetAngio v4 configuration
+# This file defines pipeline defaults and relative paths.
+# Update values as needed for your environment.
+
+project:
+  name: "RetAngio"
+  seed: 1234
+  output_dir: "results"
+
+input:
+  samples_csv: "config/samples.csv"
+  raw_archives_dir: "data/raw_archives"
+  extracted_dir: "data/extracted"
+
+analysis:
+  sample_column: "sample_id"
+  condition_column: "condition"
+  timepoint_column: "timepoint"
+  baseline_condition: "CTRL"
+
+preprocessing:
+  min_cells_per_gene: 3
+  min_features_create_object: 200
+
+doublets:
+  method: "scDblFinder"
+
+ambient_rna:
+  enabled: true
+
+unintegrated:
+  npcs: 30
+  resolution_grid: [0.2, 0.4, 0.6, 0.8, 1.0]
+
+integration:
+  methods: ["none", "rpca", "harmony"]
+  nfeatures: 3000
+  npcs: 30
+
+annotation:
+  zarkada_excel: "data/metadata/zarkada_markers.xlsx"
+  zarkada_sheet: "Sheet1"
+
+pseudobulk:
+  min_replicates_per_condition: 2
+  top_n: 20

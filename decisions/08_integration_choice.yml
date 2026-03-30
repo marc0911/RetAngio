@@ -1,0 +1,6 @@
+# Decision checkpoint for final integration method (Stage 8).
+# method must be one of: none, rpca, harmony
+
+method: "none"
+dims_use: 1:30
+resolution: 0.6

@@ -1,0 +1,6 @@
+# Decision checkpoint for QC filtering thresholds (Stage 1).
+# Update after inspecting QC distributions.
+
+min_features: 300
+max_features: 6000
+max_percent_mt: 15
