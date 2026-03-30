@@ -1,5 +1,15 @@
-# Utility helpers for RetAngio stage scripts.
-# Keep dependencies lightweight and behavior explicit.
+suppressPackageStartupMessages({
+  library(yaml)
+})
+
+timestamp_string <- function() {
+  format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+}
+
+log_message <- function(...) {
+  msg <- paste(..., collapse = " ")
+  message(sprintf("%s | %s", timestamp_string(), msg))
+}
 
 ensure_dir <- function(path) {
   if (!dir.exists(path)) {
@@ -8,232 +18,217 @@ ensure_dir <- function(path) {
   invisible(normalizePath(path, winslash = "/", mustWork = FALSE))
 }
 
-log_message <- function(...) {
-  timestamp <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
-  message(sprintf("[%s] %s", timestamp, paste(..., collapse = "")))
-}
-
 assert_file_exists <- function(path, label = NULL) {
-  if (!file.exists(path)) {
-    if (is.null(label)) {
-      stop(sprintf("Required file does not exist: '%s'", path), call. = FALSE)
-    }
-    stop(sprintf("Required file (%s) does not exist: '%s'", label, path), call. = FALSE)
+  if (is.null(path) || is.na(path) || !nzchar(path)) {
+    stop(sprintf("%s is missing or empty.", ifelse(is.null(label), "File path", label)), call. = FALSE)
   }
-  invisible(TRUE)
+  if (!file.exists(path)) {
+    stop(sprintf("%s not found: %s", ifelse(is.null(label), "File", label), path), call. = FALSE)
+  }
+  invisible(path)
 }
 
 assert_dir_exists <- function(path, label = NULL) {
-  if (!dir.exists(path)) {
-    if (is.null(label)) {
-      stop(sprintf("Required directory does not exist: '%s'", path), call. = FALSE)
-    }
-    stop(sprintf("Required directory (%s) does not exist: '%s'", label, path), call. = FALSE)
+  if (is.null(path) || is.na(path) || !nzchar(path)) {
+    stop(sprintf("%s is missing or empty.", ifelse(is.null(label), "Directory path", label)), call. = FALSE)
   }
-  invisible(TRUE)
+  if (!dir.exists(path)) {
+    stop(sprintf("%s not found: %s", ifelse(is.null(label), "Directory", label), path), call. = FALSE)
+  }
+  invisible(path)
 }
 
-read_config <- function(config_path) {
-  assert_file_exists(config_path, label = "config")
+read_config <- function(config_path = "config/config.yml") {
+  assert_file_exists(config_path, "Config file")
   cfg <- yaml::read_yaml(config_path)
-  if (!is.list(cfg)) {
-    stop(sprintf("Config file '%s' did not parse as a YAML mapping/list.", config_path), call. = FALSE)
+
+  required_top <- c("project", "input", "analysis")
+  missing_top <- setdiff(required_top, names(cfg))
+  if (length(missing_top) > 0) {
+    stop(sprintf(
+      "Config file is missing required top-level sections: %s",
+      paste(missing_top, collapse = ", ")
+    ), call. = FALSE)
   }
+
   cfg
 }
 
 save_rds_with_log <- function(object, path) {
   ensure_dir(dirname(path))
   saveRDS(object, path)
-  log_message("Saved RDS: ", path)
+  log_message("Saved RDS:", path)
+  invisible(path)
 }
 
 load_rds_with_log <- function(path) {
-  assert_file_exists(path, label = "RDS")
-  log_message("Loading RDS: ", path)
+  assert_file_exists(path, "RDS file")
+  log_message("Loading RDS:", path)
   readRDS(path)
 }
 
-read_samples_csv <- function(samples_csv) {
-  assert_file_exists(samples_csv, label = "samples CSV")
-
-  samples <- utils::read.csv(
-    file = samples_csv,
-    stringsAsFactors = FALSE,
-    check.names = FALSE
-  )
-
-  required_cols <- c(
-    "sample_id", "condition", "timepoint",
-    "filtered_h5", "raw_h5", "molecule_info_h5"
-  )
-  missing_cols <- setdiff(required_cols, colnames(samples))
-  if (length(missing_cols) > 0L) {
-    stop(
-      sprintf(
-        "Sample manifest is missing required column(s): %s",
-        paste(missing_cols, collapse = ", ")
-      ),
-      call. = FALSE
-    )
-  }
-
-  if (anyDuplicated(samples$sample_id) > 0L) {
-    dup_ids <- unique(samples$sample_id[duplicated(samples$sample_id)])
-    stop(
-      sprintf("Duplicate sample_id values found: %s", paste(dup_ids, collapse = ", ")),
-      call. = FALSE
-    )
-  }
-
-  required_nonempty_stage0 <- c("sample_id", "condition", "timepoint", "filtered_h5")
-  for (col in required_nonempty_stage0) {
-    is_missing <- is.na(samples[[col]]) | trimws(samples[[col]]) == ""
-    if (any(is_missing)) {
-      bad_rows <- which(is_missing)
-      stop(
-        sprintf(
-          "Stage-0 required column '%s' has missing value(s) at row(s): %s",
-          col,
-          paste(bad_rows, collapse = ", ")
-        ),
-        call. = FALSE
-      )
-    }
-  }
-
-  # Optional for stage 0. Keep columns but normalize blanks to NA.
-  for (col in c("raw_h5", "molecule_info_h5")) {
-    vals <- trimws(samples[[col]])
-    vals[is.na(vals) | vals == ""] <- NA_character_
-    samples[[col]] <- vals
-  }
-
-  samples
-}
-
-create_stage_dirs <- function(cfg) {
-  dirs <- c(
-    cfg$project$output_dir,
-    "results/objects",
-    "results/qc",
-    "results/doublets",
-    "results/ambient",
-    "results/unintegrated",
-    "results/integration_compare",
-    "results/annotation",
-    "results/dge",
-    "plots",
-    "logs",
-    "data/metadata"
-  )
-  invisible(lapply(dirs, ensure_dir))
-}
-
 read_decision_yaml <- function(path) {
-  assert_file_exists(path, label = "decision file")
-  decision <- yaml::read_yaml(path)
-  if (!is.list(decision)) {
-    stop(sprintf("Decision file '%s' is not a valid YAML mapping/list.", path), call. = FALSE)
-  }
-  decision
+  assert_file_exists(path, "Decision YAML")
+  yaml::read_yaml(path)
 }
 
 require_decision_fields <- function(decision, fields, path) {
-  missing <- setdiff(fields, names(decision))
-  if (length(missing) > 0L) {
-    stop(
-      sprintf(
-        "Decision file '%s' missing field(s): %s",
-        path,
-        paste(missing, collapse = ", ")
-      ),
-      call. = FALSE
-    )
+  missing_fields <- fields[!fields %in% names(decision)]
+  if (length(missing_fields) > 0) {
+    stop(sprintf(
+      "Decision file %s is missing required fields: %s",
+      path,
+      paste(missing_fields, collapse = ", ")
+    ), call. = FALSE)
   }
+
+  empty_fields <- vapply(
+    fields,
+    function(x) {
+      val <- decision[[x]]
+      is.null(val) || (length(val) == 1 && is.na(val)) || (is.character(val) && !nzchar(val))
+    },
+    logical(1)
+  )
+
+  if (any(empty_fields)) {
+    stop(sprintf(
+      "Decision file %s has empty required fields: %s",
+      path,
+      paste(fields[empty_fields], collapse = ", ")
+    ), call. = FALSE)
+  }
+
   invisible(TRUE)
 }
 
 stop_for_missing_decision <- function(path, message = NULL) {
-  if (!file.exists(path)) {
-    if (is.null(message)) {
-      message <- sprintf("Missing required decision file: '%s'", path)
-    }
-    stop(message, call. = FALSE)
+  base_msg <- sprintf("Required decision file is missing: %s", path)
+  if (is.null(message)) {
+    stop(base_msg, call. = FALSE)
+  } else {
+    stop(sprintf("%s\n%s", base_msg, message), call. = FALSE)
   }
-  invisible(TRUE)
 }
 
-guess_sample_paths <- function(sample_id, extracted_dir = "data/extracted") {
-  # Convenience helper only. Manifest remains source of truth.
-  sample_dir <- file.path(extracted_dir, sample_id)
-  if (!dir.exists(sample_dir)) {
-    return(list(filtered = NA_character_, raw = NA_character_, molecule = NA_character_))
+create_stage_dirs <- function(cfg) {
+  output_dir <- cfg$project$output_dir
+
+  dirs <- c(
+    "results",
+    output_dir,
+    file.path(output_dir, "objects"),
+    file.path(output_dir, "qc"),
+    file.path(output_dir, "doublets"),
+    file.path(output_dir, "ambient"),
+    file.path(output_dir, "unintegrated"),
+    file.path(output_dir, "integration_compare"),
+    file.path(output_dir, "annotation"),
+    file.path(output_dir, "dge"),
+    "plots",
+    file.path("plots", "00_build"),
+    "logs",
+    "data",
+    "data/metadata"
+  )
+
+  invisible(vapply(dirs, ensure_dir, character(1)))
+}
+
+normalize_optional_path <- function(x) {
+  if (is.null(x) || is.na(x) || !nzchar(trimws(x))) {
+    return(NA_character_)
+  }
+  trimws(x)
+}
+
+guess_sample_paths <- function(sample_id, extracted_dir) {
+  base_dir <- file.path(extracted_dir, sample_id)
+
+  # Search a few likely places, keeping this helper conservative.
+  candidates_filtered <- c(
+    file.path(base_dir, sample_id, "outs", "per_sample_outs", sample_id, "count", "sample_filtered_feature_bc_matrix.h5"),
+    file.path(base_dir, sample_id, sample_id, "outs", "per_sample_outs", sample_id, "count", "sample_filtered_feature_bc_matrix.h5"),
+    file.path(base_dir, "outs", "per_sample_outs", sample_id, "count", "sample_filtered_feature_bc_matrix.h5")
+  )
+
+  candidates_raw <- c(
+    file.path(base_dir, sample_id, "outs", "multi", "count", "raw_feature_bc_matrix.h5"),
+    file.path(base_dir, sample_id, sample_id, "outs", "multi", "count", "raw_feature_bc_matrix.h5"),
+    file.path(base_dir, "outs", "multi", "count", "raw_feature_bc_matrix.h5")
+  )
+
+  candidates_mol <- c(
+    file.path(base_dir, sample_id, "outs", "multi", "count", "raw_molecule_info.h5"),
+    file.path(base_dir, sample_id, sample_id, "outs", "multi", "count", "raw_molecule_info.h5"),
+    file.path(base_dir, "outs", "multi", "count", "raw_molecule_info.h5")
+  )
+
+  first_existing <- function(paths) {
+    hit <- paths[file.exists(paths)]
+    if (length(hit) == 0) NA_character_ else hit[[1]]
   }
 
-  filtered_candidates <- c(
-    file.path(sample_dir, "sample_filtered_feature_bc_matrix.h5"),
-    file.path(sample_dir, "filtered_feature_bc_matrix.h5"),
-    file.path(sample_dir, "sample_filtered_feature_bc_matrix")
-  )
-  raw_candidates <- c(
-    file.path(sample_dir, "raw_feature_bc_matrix.h5"),
-    file.path(sample_dir, "raw_feature_bc_matrix")
-  )
-  molecule_candidates <- c(
-    file.path(sample_dir, "raw_molecule_info.h5"),
-    file.path(sample_dir, "molecule_info.h5")
-  )
-
-  pick_existing <- function(paths) {
-    idx <- which(file.exists(paths) | dir.exists(paths))
-    if (length(idx) == 0L) {
-      return(NA_character_)
-    }
-    paths[[idx[[1L]]]]
-  }
-
-  list(
-    filtered = pick_existing(filtered_candidates),
-    raw = pick_existing(raw_candidates),
-    molecule = pick_existing(molecule_candidates)
+  data.frame(
+    sample_id = sample_id,
+    filtered_h5 = first_existing(candidates_filtered),
+    raw_h5 = first_existing(candidates_raw),
+    molecule_info_h5 = first_existing(candidates_mol),
+    stringsAsFactors = FALSE
   )
 }
 
-resolve_filtered_input_path <- function(filtered_path) {
-  if (file.exists(filtered_path)) {
-    return(list(path = filtered_path, type = "h5_or_file"))
-  }
-
-  if (dir.exists(filtered_path)) {
-    return(list(path = filtered_path, type = "matrix_dir"))
-  }
-
-  dir_candidate <- file.path(filtered_path, "sample_filtered_feature_bc_matrix")
-  if (dir.exists(dir_candidate)) {
-    return(list(path = dir_candidate, type = "matrix_dir"))
-  }
-
-  h5_candidates <- c(
-    filtered_path,
-    file.path(filtered_path, "sample_filtered_feature_bc_matrix.h5"),
-    file.path(filtered_path, "filtered_feature_bc_matrix.h5")
+validate_sample_manifest <- function(samples_df) {
+  required_cols <- c(
+    "sample_id",
+    "condition",
+    "timepoint",
+    "filtered_h5",
+    "raw_h5",
+    "molecule_info_h5"
   )
 
-  for (candidate in h5_candidates) {
-    if (file.exists(candidate)) {
-      return(list(path = candidate, type = "h5_or_file"))
+  missing_cols <- setdiff(required_cols, colnames(samples_df))
+  if (length(missing_cols) > 0) {
+    stop(sprintf(
+      "Sample manifest is missing required columns: %s",
+      paste(missing_cols, collapse = ", ")
+    ), call. = FALSE)
+  }
+
+  if (anyDuplicated(samples_df$sample_id) > 0) {
+    dup_ids <- unique(samples_df$sample_id[duplicated(samples_df$sample_id)])
+    stop(sprintf(
+      "Duplicated sample_id values found in sample manifest: %s",
+      paste(dup_ids, collapse = ", ")
+    ), call. = FALSE)
+  }
+
+  required_nonempty <- c("sample_id", "condition", "timepoint", "filtered_h5")
+  for (col in required_nonempty) {
+    vals <- samples_df[[col]]
+    bad <- is.na(vals) | !nzchar(trimws(as.character(vals)))
+    if (any(bad)) {
+      stop(sprintf(
+        "Column '%s' contains missing/empty values for sample(s): %s",
+        col,
+        paste(samples_df$sample_id[bad], collapse = ", ")
+      ), call. = FALSE)
     }
   }
 
-  stop(
-    sprintf(
-      paste(
-        "Unable to resolve filtered matrix input from manifest value '%s'.",
-        "Provide a valid filtered H5 path or filtered matrix directory."
-      ),
-      filtered_path
-    ),
-    call. = FALSE
-  )
+  samples_df$sample_id <- trimws(as.character(samples_df$sample_id))
+  samples_df$condition <- trimws(as.character(samples_df$condition))
+  samples_df$timepoint <- trimws(as.character(samples_df$timepoint))
+  samples_df$filtered_h5 <- trimws(as.character(samples_df$filtered_h5))
+  samples_df$raw_h5 <- vapply(samples_df$raw_h5, normalize_optional_path, character(1))
+  samples_df$molecule_info_h5 <- vapply(samples_df$molecule_info_h5, normalize_optional_path, character(1))
+
+  samples_df
+}
+
+read_samples_csv <- function(samples_csv) {
+  assert_file_exists(samples_csv, "Sample manifest CSV")
+  df <- read.csv(samples_csv, stringsAsFactors = FALSE, check.names = FALSE)
+  validate_sample_manifest(df)
 }
