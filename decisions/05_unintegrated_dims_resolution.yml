@@ -1,5 +1,3 @@
-# Decision checkpoint for unintegrated clustering (Stage 5).
-# Set based on dimensionality diagnostics and cluster stability.
-
-dims_use: "1:30"
-resolution: 0.6
+# Edit after reviewing PCA/clustree outputs from stage 05.
+dims_use: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+resolution: 0.4
