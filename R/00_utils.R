@@ -1,5 +1,5 @@
 # Utility helpers for RetAngio stage scripts.
-# Keep this file lightweight and dependency-minimal.
+# Keep dependencies lightweight and behavior explicit.
 
 ensure_dir <- function(path) {
   if (!dir.exists(path)) {
@@ -102,10 +102,8 @@ read_samples_csv <- function(samples_csv) {
     }
   }
 
-  # raw_h5 and molecule_info_h5 are optional for stage 0.
-  # Keep as character, normalize blanks to NA for cleaner downstream handling.
-  optional_cols <- c("raw_h5", "molecule_info_h5")
-  for (col in optional_cols) {
+  # Optional for stage 0. Keep columns but normalize blanks to NA.
+  for (col in c("raw_h5", "molecule_info_h5")) {
     vals <- trimws(samples[[col]])
     vals[is.na(vals) | vals == ""] <- NA_character_
     samples[[col]] <- vals
@@ -167,7 +165,7 @@ stop_for_missing_decision <- function(path, message = NULL) {
 }
 
 guess_sample_paths <- function(sample_id, extracted_dir = "data/extracted") {
-  # Convenience helper only. The manifest remains source of truth.
+  # Convenience helper only. Manifest remains source of truth.
   sample_dir <- file.path(extracted_dir, sample_id)
   if (!dir.exists(sample_dir)) {
     return(list(filtered = NA_character_, raw = NA_character_, molecule = NA_character_))
@@ -203,7 +201,6 @@ guess_sample_paths <- function(sample_id, extracted_dir = "data/extracted") {
 }
 
 resolve_filtered_input_path <- function(filtered_path) {
-  # Primary expectation: filtered matrix path from manifest.
   if (file.exists(filtered_path)) {
     return(list(path = filtered_path, type = "h5_or_file"))
   }
@@ -212,7 +209,6 @@ resolve_filtered_input_path <- function(filtered_path) {
     return(list(path = filtered_path, type = "matrix_dir"))
   }
 
-  # Conservative fallback if a sample directory was supplied instead of matrix path.
   dir_candidate <- file.path(filtered_path, "sample_filtered_feature_bc_matrix")
   if (dir.exists(dir_candidate)) {
     return(list(path = dir_candidate, type = "matrix_dir"))

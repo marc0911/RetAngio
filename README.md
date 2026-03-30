@@ -1,7 +1,7 @@
 # RetAngio (v4 rebuild)
 
 ## Purpose
-RetAngio is a reproducible, non-interactive scRNA-seq analysis repository for mouse retinal OIR data. This rebuild starts from raw Cell Ranger outputs and is designed for both local and HPC/SLURM execution.
+RetAngio is a reproducible, non-interactive scRNA-seq analysis repository for mouse retinal OIR data. This rebuild starts from raw Cell Ranger outputs and is designed for local and HPC/SLURM execution.
 
 ## Project overview
 This project currently tracks five samples:
@@ -11,7 +11,7 @@ This project currently tracks five samples:
 - P17_CTRL
 - P17_OIR
 
-The repository is organized as explicit stage scripts plus decision checkpoints.
+The repository is organized as stage scripts plus decision checkpoints.
 
 ## Current implementation status
 Only **Stage 0** is currently implemented.
@@ -25,9 +25,10 @@ Not implemented yet:
 - QC filtering
 - Doublet detection/removal
 - Ambient RNA correction
-- Clustering/integration workflows
-- Cell annotation/program scoring
-- DGE/pseudobulk analysis
+- Unintegrated clustering decisions
+- Integration comparison/selection
+- Annotation/program scoring
+- DGE/pseudobulk
 
 ## Expected raw inputs
 For each sample, extracted Cell Ranger archive content is expected to include:
@@ -37,7 +38,7 @@ For each sample, extracted Cell Ranger archive content is expected to include:
 
 Recommended layout:
 - Archives: `data/raw_archives/`
-- Extracted sample folders/files: `data/extracted/`
+- Extracted sample files: `data/extracted/`
 
 ## Repository structure
 
@@ -67,17 +68,17 @@ RetAngio/
 ## Configure `config/samples.csv`
 1. Open `config/samples.csv`.
 2. Keep one row per sample.
-3. Set required stage-0 fields:
+3. Required for stage 0:
    - `sample_id`
    - `condition`
    - `timepoint`
-   - `filtered_h5` (required for stage 0)
-4. Fill `raw_h5` and `molecule_info_h5` if available (recommended for provenance).
-
-For stage 0, only the filtered matrix input is required to run.
+   - `filtered_h5`
+4. Optional for stage 0 (recommended for later stages):
+   - `raw_h5`
+   - `molecule_info_h5`
 
 ## Run locally
-From the repository root:
+From repo root:
 
 ```bash
 Rscript R/00_build_fresh_object.R config/config.yml
@@ -86,13 +87,13 @@ Rscript R/00_build_fresh_object.R config/config.yml
 If config path is omitted, default is `config/config.yml`.
 
 ## Run on cluster (SLURM)
-Submit:
+Submit with:
 
 ```bash
 sbatch slurm/run_00_build_fresh_object.sh
 ```
 
-Default SLURM resources are conservative (8 CPUs, 64G RAM, 12h) and may need adjustment.
+Default resources are conservative (8 CPUs, 64G RAM, 12h) and may need adjustment.
 
 ## Stage-0 outputs
 - `results/objects/00_raw_merged.rds`

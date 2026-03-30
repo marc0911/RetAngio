@@ -31,17 +31,18 @@ for (i in seq_len(nrow(samples))) {
 
   log_message("Processing sample: ", sample_id)
 
-  # Stage 0 hard-requires only filtered matrix input.
+  # Stage 0 requires only filtered input.
   resolved <- resolve_filtered_input_path(filtered_ref)
   input_path <- resolved$path
 
+  # raw_h5 and molecule_info_h5 are optional at this stage.
   if (!is.na(raw_h5) && !file.exists(raw_h5)) {
-    log_message("WARNING: raw_h5 path recorded but not found for ", sample_id, ": ", raw_h5)
+    log_message("WARNING: raw_h5 was provided but not found for ", sample_id, ": ", raw_h5)
   }
 
   if (!is.na(molecule_info_h5) && !file.exists(molecule_info_h5)) {
     log_message(
-      "WARNING: molecule_info_h5 path recorded but not found for ",
+      "WARNING: molecule_info_h5 was provided but not found for ",
       sample_id, ": ", molecule_info_h5
     )
   }
@@ -54,7 +55,7 @@ for (i in seq_len(nrow(samples))) {
     Seurat::Read10X_h5(filename = input_path)
   }
 
-  # If Read10X* returns a list (multi-assay), prefer Gene Expression when present.
+  # Handle multi-assay inputs conservatively.
   if (is.list(counts)) {
     if ("Gene Expression" %in% names(counts)) {
       counts <- counts[["Gene Expression"]]
@@ -85,7 +86,7 @@ for (i in seq_len(nrow(samples))) {
   so$timepoint <- timepoint
   so$orig.ident <- sample_id
 
-  # Keep sample-level provenance in @misc rather than repeating per-cell path metadata.
+  # Keep provenance in @misc (sample-level) instead of repeating per-cell paths.
   so@misc$sample_manifest <- list(
     sample_id = sample_id,
     condition = condition,
@@ -127,7 +128,6 @@ merged_object <- if (length(sample_objects) == 1L) {
   )
 }
 
-# Store full resolved manifest once on merged object for downstream provenance.
 merged_object@misc$sample_manifest <- samples
 
 summary_df <- do.call(rbind, summary_rows)

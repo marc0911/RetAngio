@@ -1,6 +1,5 @@
 # Decision checkpoint for unintegrated clustering (Stage 5).
-# dims_use should be chosen from dimensionality diagnostics.
-# resolution should reflect stable, biologically interpretable clusters.
+# Set based on dimensionality diagnostics and cluster stability.
 
 dims_use: "1:30"
 resolution: 0.6

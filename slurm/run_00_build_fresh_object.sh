@@ -9,7 +9,7 @@
 set -euo pipefail
 
 # Conservative defaults for stage 0.
-# Adjust CPU, memory, and walltime based on dataset size and cluster policy.
+# Adjust resources based on data size and cluster policy.
 
 mkdir -p logs
 
