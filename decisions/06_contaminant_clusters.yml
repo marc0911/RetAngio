@@ -1,4 +1,2 @@
-# Decision checkpoint for contaminant cluster removal (Stage 6).
-# Fill with cluster IDs to remove after marker review.
-
+# Fill with cluster IDs to remove after contamination review.
 clusters_to_remove: []
