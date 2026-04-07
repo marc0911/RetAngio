@@ -4,28 +4,52 @@ RetAngio v4 is a reproducible scRNA-seq analysis repository for the mouse retina
 
 ## Current status
 
-Only **Stage 0** is implemented at the moment:
+The repository now contains a working Seurat v5 / SLURM pipeline implemented through the current **EC-only branch of analysis**.
 
-- build a fresh merged Seurat object from sample-level filtered Cell Ranger matrices
-- attach sample metadata
-- save a resolved sample manifest
-- export a per-sample build summary
+### Implemented stages so far
 
-No QC filtering, doublet removal, ambient RNA correction, clustering, integration, annotation, or DGE is implemented yet.
+- **Stage 0**: build fresh merged Seurat object from Cell Ranger filtered matrices
+- **Stage 1**: compute QC metrics
+- **Stage 2**: filter low-quality cells
+- **Stage 3**: detect doublets
+- **Stage 4**: remove doublets
+- **Stage 5**: post-doublet QC check
+- **Stage 6**: prepare per-sample SCT objects
+- **Stage 7**: run unintegrated PCA
+- **Stage 8**: unintegrated clustering and UMAP
+- **Stage 9**: RPCA integration fast-track
+- **Stage 10**: contaminant review and visualization
+- **Stage 11**: subset EC-enriched cells from the unintegrated object
+- **Stage 12**: prepare EC-only SCT objects
+- **Stage 13**: run EC-only unintegrated PCA
+- **Stage 14**: EC-only unintegrated clustering and UMAP
+- **Stage 15**: EC-only marker calculation on RNA assay
+- **Stage 16**: EC-only RPCA integration
+- **Stage 17**: EC-only integrated clustering and UMAP
+- **Stage 17b**: replot integrated UMAPs with harmonized styling
+- **Stage 18**: EC-only integrated marker calculation on RNA assay
 
-## Planned pipeline stages
+## Current analysis logic
 
-0. Build fresh object from Cell Ranger outputs
-1. Compute QC metrics
-2. Filter low-quality cells
-3. Detect/remove doublets
-4. Ambient RNA correction
-5. Unintegrated clustering
-6. Remove non-endothelial cells
-7. Compare integration methods: none vs RPCA vs Harmony
-8. Choose final integration
-9. Annotation / program scoring
-10. DGE / pseudobulk
+The present repository reflects a two-step strategy:
+
+1. perform initial clustering on the full filtered dataset,
+2. identify and exclude non-endothelial contaminants,
+3. rebuild an **EC-enriched** object,
+4. rerun normalization, PCA, clustering, and integration on the EC-only branch.
+
+This is the currently active and preferred analysis branch.
+
+## Current key decisions
+
+The following decision files are currently part of the workflow:
+
+- `decisions/01_qc_thresholds.yml`
+- `decisions/05_unintegrated_dims_resolution.yml`
+- `decisions/06_contaminant_clusters.yml`
+- `decisions/08_integration_choice.yml`
+
+These files document the major human checkpoints used to guide the pipeline.
 
 ## Expected raw inputs
 
@@ -44,19 +68,13 @@ RetAngio/
 ├── config/
 ├── decisions/
 ├── R/
+├── scripts/
 ├── slurm/
 ├── data/
 │   ├── raw_archives/
 │   ├── extracted/
 │   └── metadata/
 ├── results/
-│   ├── objects/
-│   ├── qc/
-│   ├── doublets/
-│   ├── ambient/
-│   ├── unintegrated/
-│   ├── integration_compare/
-│   ├── annotation/
-│   └── dge/
 ├── plots/
-└── logs/
+├── logs/
+└── README.md
