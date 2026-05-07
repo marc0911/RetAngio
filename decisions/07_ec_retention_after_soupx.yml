@@ -1,0 +1,101 @@
+decision_id: 07_ec_retention_after_soupx
+date: 2026-04-15
+
+source_object: results/objects/06_soupx_unintegrated_clustered_umap.rds
+
+supporting_files:
+  markers_full: results/markers/07a_unintegrated_after_soupx_findallmarkers.csv
+  markers_top10: results/markers/07a_unintegrated_after_soupx_top10_markers.csv
+  review_top20: results/review/07b_cluster_review_top20_markers.csv
+  review_marker_panel: results/review/07b_cluster_review_marker_panel_avgexp.csv
+  review_cluster_sizes: results/review/07b_cluster_review_cluster_sizes.csv
+  review_plots_dir: plots/07c_unintegrated_soupx_cluster_review
+
+retained_clusters:
+  - "0"
+  - "1"
+  - "2"
+  - "3"
+  - "4"
+  - "5"
+  - "6"
+  - "7"
+  - "9"
+  - "11"
+  - "15"
+
+removed_clusters:
+  - "8"
+  - "10"
+  - "12"
+  - "13"
+  - "14"
+  - "16"
+  - "17"
+
+summary:
+  cluster_0: "endothelial, BRB/capillary-like"
+  cluster_1: "activated tip-like endothelial"
+  cluster_2: "arterial/specialized endothelial"
+  cluster_3: "proliferative endothelial"
+  cluster_4: "endothelial"
+  cluster_5: "proliferative endothelial"
+  cluster_6: "endothelial"
+  cluster_7: "endothelial"
+  cluster_8: "mural/pericyte-like contaminant"
+  cluster_9: "endothelial"
+  cluster_10: "photoreceptor contaminant"
+  cluster_11: "endothelial"
+  cluster_12: "neuronal/retinal contaminant"
+  cluster_13: "neuronal/retinal contaminant"
+  cluster_14: "neuronal/retinal contaminant"
+  cluster_15: "endothelial"
+  cluster_16: "glial/Müller-like contaminant"
+  cluster_17: "neuronal contaminant"
+
+marker_rationale:
+  endothelial_markers_considered:
+    - Kdr
+    - Ptprb
+    - Pecam1
+    - Cldn5
+    - Emcn
+    - Cd34
+    - Tek
+    - Vwf
+  subtype_markers_considered:
+    - Apln
+    - Angpt2
+    - Esm1
+    - Adm
+    - Pgf
+    - Sox17
+    - Gja4
+    - Bmx
+    - Efnb2
+    - Slco1a4
+    - Mki67
+    - Top2a
+    - Pclaf
+    - Birc5
+  contaminant_markers_considered:
+    - Rgs5
+    - Cspg4
+    - Pdgfrb
+    - Des
+    - Notch3
+    - Snap25
+    - Syt1
+    - Rho
+    - Pde6b
+    - Prph2
+    - Rlbp1
+    - Slc1a3
+    - Glul
+    - Aqp4
+
+notes:
+  - "Decision made after SoupX-corrected unintegrated clustering review."
+  - "Retained clusters show endothelial core markers and coherent endothelial subtype structure."
+  - "Removed clusters show mural, neuronal, photoreceptor, or glial contamination signatures."
+  - "This decision file should be referenced by the EC-subsetting step."

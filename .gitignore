@@ -1,35 +1,24 @@
-# R session/user files
+# RetAngio generated outputs / heavy files
+results/
+plots/
+logs/
+
+# Raw / extracted data
+data/raw_archives/
+data/extracted/
+
+# Export packages and archives
+*.tar.gz
+export/
+exports/
+
+# Temporary / backup files
+*.bak
+*.save
+*.tmp
+.DS_Store
+
+# R / session artifacts
 .Rhistory
 .RData
-.Ruserdata
 .Rproj.user/
-
-# renv managed libraries and staging
-renv/library/
-renv/staging/
-
-# Runtime outputs
-logs/*
-results/*
-plots/*
-
-# Large raw/extracted data (keep folder structure, not contents)
-data/raw_archives/*
-data/extracted/*
-
-# Keep .gitkeep placeholders for directory structure
-!logs/.gitkeep
-!plots/.gitkeep
-!results/.gitkeep
-!results/**/.gitkeep
-!data/raw_archives/.gitkeep
-!data/extracted/.gitkeep
-!data/metadata/.gitkeep
-
-# Keep repository templates/config/code tracked
-!config/
-!decisions/
-!R/
-!slurm/
-!README.md
-!config/samples.csv

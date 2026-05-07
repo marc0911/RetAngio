@@ -1,0 +1,14 @@
+stage: 10c_ec_after_soupx_harmony_finalize
+source_object: results/objects/10b_ec_after_soupx_harmony_resolution_sweep.rds
+
+chosen_reduction: harmony
+chosen_umap: umap.harmony
+chosen_resolution: 0.4
+chosen_cluster_column: SCT_snn_res.0.4
+
+rationale: >
+  Harmony integrated clustering resolution selected after review of the Harmony
+  clustree and UMAP resolution sweep. Resolution 0.4 was preferred over 0.5 as the
+  more conservative and interpretable first-pass integrated working resolution.
+
+author: mschwab2
