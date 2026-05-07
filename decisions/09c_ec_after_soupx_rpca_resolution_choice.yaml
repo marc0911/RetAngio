@@ -1,0 +1,14 @@
+stage: 09c_ec_after_soupx_rpca_finalize
+source_object: results/objects/09b_ec_after_soupx_rpca_resolution_sweep.rds
+
+chosen_reduction: integrated.rpca
+chosen_umap: umap.rpca
+chosen_resolution: 0.4
+chosen_cluster_column: SCT_snn_res.0.4
+
+rationale: >
+  RPCA integrated clustering resolution selected after review of the RPCA clustree
+  and UMAP resolution sweep. Resolution 0.4 was preferred over 0.5 as the more
+  conservative and interpretable first-pass integrated working resolution.
+
+author: mschwab2

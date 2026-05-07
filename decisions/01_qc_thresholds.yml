@@ -1,0 +1,36 @@
+stage: "01_qc_thresholds"
+
+status: "provisional_decision_after_visual_qc"
+
+inputs:
+  summary_table: "results/qc/01_qc_summary_by_sample.csv"
+  plots:
+    - "plots/qc/01_qc_violin_features.png"
+    - "plots/qc/01_qc_violin_percentages.png"
+    - "plots/qc/01_qc_scatter_nCount_vs_nFeature.png"
+    - "plots/qc/01_qc_scatter_nCount_vs_percent_mt.png"
+    - "plots/qc/01_qc_hist_nFeature.png"
+    - "plots/qc/01_qc_hist_percent_mt.png"
+
+decision:
+  min_features_rna: 500
+  max_percent_mt: 10
+  min_counts_rna: null
+  max_counts_rna: null
+  max_features_rna: null
+
+rationale:
+  - "All samples show broadly similar QC distributions."
+  - "Most cells have low mitochondrial percentages, with dense distributions centered around ~1–6% and sparse long tails."
+  - "A global threshold of percent.mt <= 10 removes the high-mitochondrial tail while remaining conservative."
+  - "nFeature_RNA distributions show a main body around ~3000–6500 genes with a lower-complexity compartment at low feature counts."
+  - "A threshold of nFeature_RNA >= 500 is conservative and removes poor-quality low-complexity cells without being overly aggressive."
+  - "No hard upper threshold on nFeature_RNA or nCount_RNA is applied at this stage."
+  - "Potential high-feature/high-count doublets will be handled in the dedicated doublet detection stage rather than through arbitrary QC cutoffs."
+
+notes:
+  - "Thresholds may be revisited after doublet detection if needed."
+  - "Decision intentionally prioritizes sensitivity over aggressive filtering."
+
+author: "Marc"
+date: "2026-04-01"

@@ -1,0 +1,25 @@
+stage: "06_contaminant_clusters"
+
+status: "selected_from_unintegrated_review"
+
+source_object: "results/objects/08_unintegrated_clustered_umap.rds"
+source_cluster_column: "unintegrated_snn_res.0.4"
+
+decision:
+  exclude_clusters: [7, 8, 9, 10, 11, 12, 13, 14, 15]
+  keep_clusters: [0, 1, 2, 3, 4, 5, 6]
+
+rationale:
+  - "Cluster 9 is photoreceptor/rod-like (Rho, Pde6b, Sag, Gngt1, Gnat1)."
+  - "Cluster 10 is mural/pericyte-like (Cspg4, Pdgfrb, Ednra, Kcnj8, Notch3)."
+  - "Clusters 7, 8, 11, and 12 show non-endothelial neuronal/neuro-retinal signatures."
+  - "Clusters 13, 14, and 15 are tiny outlier clusters and are excluded."
+  - "Clusters 0-6 retain the main endothelial structure, including proliferative and tip-like EC states."
+
+notes:
+  - "This is a first-pass contaminant exclusion before rebuilding an EC-enriched object."
+  - "Final endothelial annotation will be performed only after reclustering on the filtered EC-enriched object."
+  - "Stage 9 RPCA integration was exploratory only and should not be used as the final biological result."
+
+author: "Marc"
+date: "2026-04-01”

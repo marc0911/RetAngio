@@ -1,0 +1,42 @@
+decision_id: 08b_ec_after_soupx_unintegrated_pca_dims
+date: 2026-04-15
+
+source_object: results/objects/08b_ec_after_soupx_sct_pca_unintegrated.rds
+
+supporting_files:
+  features_used: results/pca/08b_ec_after_soupx_pca_features_used.csv
+  variance_summary: results/pca/08b_ec_after_soupx_pca_variance_summary.csv
+  elbow_plot: plots/pca/08b_ec_after_soupx_elbowplot_unintegrated.png
+  pct_variance_plot: plots/pca/08b_ec_after_soupx_pca_pct_variance.png
+  cumulative_variance_plot: plots/pca/08b_ec_after_soupx_pca_cumulative_variance.png
+
+selected_dims:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+
+summary:
+  selected_npcs: 15
+  rationale: >
+    The variance explained curve shows a strong decline across the first PCs,
+    followed by a visible flattening after approximately PC15. PCs 11 to 15
+    still appear to contain structured signal, while PCs beyond 15 contribute
+    increasingly marginal variance. A 15-PC choice provides a balanced tradeoff
+    between retaining biological structure and limiting noise for downstream
+    unintegrated clustering and UMAP.
+
+notes:
+  - "Decision made for the unintegrated EC-after-SoupX comparison arm."
+  - "This decision file should be referenced by the downstream clustering/UMAP stage."

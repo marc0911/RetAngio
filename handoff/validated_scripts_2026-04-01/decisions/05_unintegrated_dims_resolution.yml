@@ -1,0 +1,32 @@
+stage: "05_unintegrated_dims_resolution"
+
+status: "provisional_dims_decision_after_pca"
+
+inputs:
+  object: "results/objects/07_sct_pca_unintegrated.rds"
+  variance_table: "results/pca/07_pca_variance_summary.csv"
+  plots:
+    - "plots/pca/07_elbowplot_unintegrated.png"
+    - "plots/pca/07_pca_pct_variance.png"
+    - "plots/pca/07_pca_cumulative_variance.png"
+
+decision:
+  unintegrated_dims_primary: [1, 12]
+  unintegrated_dims_test_secondary:
+    - [1, 10]
+    - [1, 15]
+  resolution_grid: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1.0]
+
+rationale:
+  - "Elbow plot shows a strong initial drop followed by progressive flattening."
+  - "PCs 1-7 capture most of the dominant structure, while PCs 8-12 add moderate but still meaningful variation."
+  - "Cumulative variance reaches approximately 80% by PC9 and approximately 85% by PC12."
+  - "Using dims 1:12 provides a balanced compromise between retaining biological heterogeneity and avoiding overly noisy higher PCs."
+  - "Secondary checks with dims 1:10 and dims 1:15 will be used to assess clustering robustness."
+
+notes:
+  - "Decision remains provisional until unintegrated clustering and UMAP inspection are reviewed."
+  - "Early PCs likely still capture contamination/non-endothelial structure in addition to endothelial biology."
+
+author: "Marc"
+date: "2026-04-01"

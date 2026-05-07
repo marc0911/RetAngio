@@ -1,0 +1,40 @@
+decision_id: 08d_ec_after_soupx_unintegrated_clustering_resolution
+date: 2026-04-16
+
+source_object: results/objects/08d_ec_after_soupx_unintegrated_resolution_sweep.rds
+
+supporting_files:
+  pca_dims_decision: decisions/08b_ec_after_soupx_unintegrated_pca_dims.yml
+  review_plots_dir: plots/08d_ec_after_soupx_unintegrated_resolution_sweep
+  review_log_out: logs/08d_resolution_sweep_ec_after_soupx_unintegrated.out
+  review_log_err: logs/08d_resolution_sweep_ec_after_soupx_unintegrated.err
+
+selected_parameters:
+  dims_used:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+  clustering_resolution: 0.4
+
+summary:
+  selected_resolution: 0.4
+  rationale: >
+    After reviewing the unintegrated resolution sweep from 0.1 to 1.0 and the
+    associated clustree, resolution 0.4 was retained as the preferred balance
+    between over-merging and over-splitting for the EC-after-SoupX unintegrated arm.
+
+notes:
+  - "This decision applies to the unintegrated EC-after-SoupX comparison branch."
+  - "Downstream unintegrated marker review and method comparison should reference this decision file."
